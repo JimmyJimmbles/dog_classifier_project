@@ -37,13 +37,33 @@ from adjust_results4_isadog import adjust_results4_isadog
 from calculates_results_stats import calculates_results_stats
 from print_results import print_results
 
+def final_results(result_file):
+    result_dict = {}
+    
+    with open(result_file) as file:
+        line = file.readline()
+        
+        while line != "":
+            line = line.rstrip()
+            
+            if "percentage of pct_" in line:
+                text = line.rstrip().split("percentage of ").pop()
+                label = text.split(" is ")[0]
+                percent = text.split(" is ")[-1]
+                
+                result_dict[label] = float(percent)
+                
+            line = file.readline()
+            
+    return result_dict 
+    
 # Main program function defined below
 def main():
     # TODO 0: Measures total program runtime by collecting start time
     start_time = time()
     
     # pause program
-    sleep(15)
+#     sleep(1)
     
     # TODO 1: Define get_input_args function within the file get_input_args.py
     # This function retrieves 3 Command Line Arugments from user as input from
@@ -63,7 +83,7 @@ def main():
     #             get_pet_labels(in_arg.dir)
     # This function creates the results dictionary that contains the results, 
     # this dictionary is returned from the function call as the variable results
-    results = get_pet_labels(None)
+    results = get_pet_labels(in_arg.dir)
 
     # Function that checks Pet Images in the results Dictionary using results    
     check_creating_pet_image_labels(results)
@@ -77,7 +97,7 @@ def main():
     #             classify_images(in_arg.dir, results, in_arg.arch)
     # Creates Classifier Labels with classifier function, Compares Labels, 
     # and adds these results to the results dictionary - results
-    classify_images(None, results, None)
+    classify_images(in_arg.dir, results, in_arg.arch)
 
     # Function that checks Results Dictionary using results    
     check_classifying_images(results)    
@@ -91,7 +111,7 @@ def main():
     # Adjusts the results dictionary to determine if classifier correctly 
     # classified images as 'a dog' or 'not a dog'. This demonstrates if 
     # model can correctly classify dog images as dogs (regardless of breed)
-    adjust_results4_isadog(results, None)
+    adjust_results4_isadog(results, in_arg.dogfile)
 
     # Function that checks Results Dictionary for is-a-dog adjustment using results
     check_classifying_labels_as_dogs(results)
@@ -116,7 +136,7 @@ def main():
     #      print_results(results, results_stats, in_arg.arch, True, True)
     # Prints summary results, incorrect classifications of dogs (if requested)
     # and incorrectly classified breeds (if requested)
-    print_results(results, results_stats, None, True, True)
+    print_results(results, results_stats, in_arg.arch, True, True)
     
     # TODO 0: Measure total program runtime by collecting end time
     end_time = time()
@@ -126,6 +146,29 @@ def main():
     print("\n** Total Elapsed Runtime:",
           str(int((tot_time/3600)))+":"+str(int((tot_time%3600)/60))+":"
           +str(int((tot_time%3600)%60)) )
+    
+    print("\n** Final Results:")
+    resnet_results = final_results('resnet_pet-images.txt')
+    alexnet_results = final_results('alexnet_pet-images.txt')
+    vgg_results = final_results('vgg_pet-images.txt')
+    
+    print("\nResNet")
+    print("Not a Dog Correct: {}%".format(resnet_results['pct_correct_notdogs']))
+    print("Dogs Correct: {}%".format(resnet_results['pct_correct_dogs']))
+    print("Breeds Correct: {}%".format(resnet_results['pct_correct_breed']))
+    print("Label Match: {}%".format(resnet_results['pct_match']))
+    
+    print("\nAlexNet")
+    print("Not a Dog Correct: {}%".format(alexnet_results['pct_correct_notdogs']))
+    print("Dogs Correct: {}%".format(alexnet_results['pct_correct_dogs']))
+    print("Breeds Correct: {}%".format(alexnet_results['pct_correct_breed']))
+    print("Label Match: {}%".format(alexnet_results['pct_match']))
+    
+    print("\nVGG")
+    print("Not a Dog Correct: {}%".format(vgg_results['pct_correct_notdogs']))
+    print("Dogs Correct: {}%".format(vgg_results['pct_correct_dogs']))
+    print("Breeds Correct: {}%".format(vgg_results['pct_correct_breed']))
+    print("Label Match: {}%".format(vgg_results['pct_match']))   
     
 
 # Call to main function to run the program
